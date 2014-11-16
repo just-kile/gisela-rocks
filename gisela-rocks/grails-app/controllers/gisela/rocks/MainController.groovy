@@ -6,6 +6,7 @@ import org.joda.time.Interval
 
 class MainController {
 
+    def grailsApplication
     def googleCalendarService
 
     def client
@@ -19,15 +20,54 @@ class MainController {
         List previousTravels = retrievePreviousTravels(client)
         List upcomingTravels = retrieveUpcomingTraves(client)
 
+//        previousTravels.each { travel ->
+//            withHttp(uri: 'https://maps.googleapis.com') {
+//                def json = get(path: '/maps/api/geocode/json', query: [
+//                        address: travel.location,
+//                        key: 'AIzaSyCqTc32RWYI_Ntl-EZUF3q5XhfOUHzNHYM'])
+//                println json
+//            }
+//        }
+
+        def gpsCoordinates = []
+        previousTravels.each { travel ->
+            withHttp(uri: "https://maps.googleapis.com") {
+                def html = get(path: '/maps/api/geocode/json', query: [address: travel.location])
+                try {
+                    gpsCoordinates.add html.results[0].geometry.location
+                } catch (Throwable th) {
+                    th.printStackTrace()
+                }
+            }
+        }
+
+        def totalDistance = 0
+        def homeLat = grailsApplication.config.gisela.home.lat.toDouble()
+        def homeLng = grailsApplication.config.gisela.home.lng.toDouble()
+
+        gpsCoordinates.each {
+            // trip distance: return trip!
+            totalDistance += 2 * calcDistance(it.lat, it.lng, homeLat, homeLng)
+        }
+
+        println gpsCoordinates
+        println totalDistance
+
         [
-                current: [
+                current       : [
                         isTraveling: location != null,
                         location   : location,
                         until      : until
                 ],
 
-                previous: previousTravels,
-                upcoming: upcomingTravels
+                previous      : previousTravels,
+                upcoming      : upcomingTravels,
+
+                gpsCoordinates: gpsCoordinates,
+
+                statistics    : [
+                        totalDistance: totalDistance
+                ]
 
         ]
     }
@@ -81,5 +121,25 @@ class MainController {
     def private retrieveEventName(String eventId) {
         return client.events().get(GoogleCalendarService.CALENDAR_ID, eventId).execute()
     }
+
+
+    private double calcDistance(double lat1, double lon1, double lat2, double lon2) {
+        double theta = lon1 - lon2;
+        double dist = Math.sin(deg2rad(lat1)) * Math.sin(deg2rad(lat2)) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.cos(deg2rad(theta));
+        dist = Math.acos(dist);
+        dist = rad2deg(dist);
+        dist = dist * 60 * 1.1515;
+        dist = dist * 1.609344;
+        return (dist);
+    }
+
+    private double deg2rad(double deg) {
+        return (deg * Math.PI / 180.0);
+    }
+
+    private double rad2deg(double rad) {
+        return (rad * 180 / Math.PI);
+    }
+
 
 }

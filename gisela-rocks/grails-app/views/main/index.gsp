@@ -9,7 +9,31 @@
 <html>
 <head>
     <title>Gisela, die Wanderkrabbe</title>
+
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
+    <script>
+        function initialize() {
+            var mapOptions = {
+                zoom: 2,
+                center: new google.maps.LatLng(22.854889, 10.259410)
+            }
+            var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+
+            <g:each in="${gpsCoordinates}">
+                new google.maps.Marker({
+                    position:  new google.maps.LatLng(${it.lat}, ${it.lng}),
+                    map: map,
+                    title: 'Hello World!'
+                });
+            </g:each>
+        }
+
+        google.maps.event.addDomListener(window, 'load', initialize);
+
+    </script>
+
 </head>
+
 
 <body>
 
@@ -34,7 +58,7 @@
 
             <div class="col-xs-12 col-md-6">
                 <h2>Bisherige Reisen</h2>
-                Gisela reist gern. Und deshalb auch oft.
+                Gisela reist gern. Und deshalb auch oft. Sie ist insgesamt schon <b>${(int) statistics.totalDistance}km</b> gewandert!
                 <ul>
                     <g:each in="${previous}">
                         <li><b>${it.location}</b> (${it.start.getDayOfMonth()}.${it.start.getMonthOfYear()}.${it.start.getYear()} bis ${it.end.getDayOfMonth()}.${it.end.getMonthOfYear()}.${it.end.getYear()})
@@ -71,6 +95,12 @@
 
     </div>
 
+</div>
+
+<div class="container-fluid" style="background-color: #000000; color:#ffffff">
+    <div class="row">
+        <div id="map-canvas"></div>
+    </div>
 </div>
 
 <div class="container-fluid" style="background-color: #000000; color:#ffffff">

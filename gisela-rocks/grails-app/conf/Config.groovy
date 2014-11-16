@@ -118,4 +118,10 @@ log4j.main = {
 
 gisela {
     googleP12Certificate = System.getenv('GISELA_CERT')
+
+    home {
+        // gps coordinates (Berlin, Germany)
+        lat = '52.52000659999999'
+        lng = '13.404954'
+    }
 }
