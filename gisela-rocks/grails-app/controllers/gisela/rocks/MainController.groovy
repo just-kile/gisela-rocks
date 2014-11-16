@@ -3,8 +3,6 @@ package gisela.rocks
 import org.joda.time.DateTime
 import org.joda.time.Interval
 
-import static gisela.rocks.GoogleCalendarService.getCALENDAR_ID
-
 class MainController {
 
     def googleCalendarService
@@ -25,7 +23,7 @@ class MainController {
     }
 
     private void retrieveCurrentTravel() {
-        def items = client.events().list(CALENDAR_ID).execute().items
+        def items = client.events().list(GoogleCalendarService.CALENDAR_ID).execute().items
         items.each {
             def start = new DateTime(it.start.date.getValue())
             def end = new DateTime(it.end.date.getValue())
