@@ -12,9 +12,7 @@
 
 <body>
 
-<div class="container">
-    <g:layoutBody/>
-</div>
+<g:layoutBody/>
 
 </body>
 </html>
