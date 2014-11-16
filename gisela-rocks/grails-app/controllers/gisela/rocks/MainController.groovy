@@ -37,7 +37,7 @@ class MainController {
     }
 
     def private retrieveEventName(String eventId) {
-        return client.events().get(CALENDAR_ID, eventId).execute()
+        return client.events().get(GoogleCalendarService.CALENDAR_ID, eventId).execute()
     }
 
 }
