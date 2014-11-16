@@ -46,11 +46,12 @@
             <div class="col-xs-12 col-md-6">
                 <h2>Kommende Reisen</h2>
                 <g:if test="${upcoming}">
-                    <g:each in="${upcoming}">
-                        <li><b>${it.location}</b> (${it.start.getDayOfMonth()}.${it.start.getMonthOfYear()}.${it.start.getYear()} bis ${it.end.getDayOfMonth()}.${it.end.getMonthOfYear()}.${it.end.getYear()})
-                        </li>
-                    </g:each>
-
+                    <ul>
+                        <g:each in="${upcoming}">
+                            <li><b>${it.location}</b> (${it.start.getDayOfMonth()}.${it.start.getMonthOfYear()}.${it.start.getYear()} bis ${it.end.getDayOfMonth()}.${it.end.getMonthOfYear()}.${it.end.getYear()})
+                            </li>
+                        </g:each>
+                    </ul>
                 </g:if>
                 <g:else>
                     Gisela will sich erst einmal ausruhen und hat deswegen noch keine konkreten Pläne für die Zukunft.
