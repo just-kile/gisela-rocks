@@ -8,6 +8,7 @@ import com.google.api.client.json.JsonFactory
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.calendar.CalendarScopes
 import grails.transaction.Transactional
+import org.joda.time.DateTime
 
 import javax.annotation.PostConstruct
 
@@ -35,6 +36,20 @@ class GoogleCalendarService {
         def credential = createCredentials()
         return new com.google.api.services.calendar.Calendar.Builder(
                 httpTransport, jsonFactory, credential).setApplicationName(APPLICATION_NAME).build()
+    }
+
+    def String retrieveLocation(String eventId, DateTime lastUpdate) {
+        def event = CalendarEvent.findByEventId(eventId)
+        if (!event || event.lastUpdate != lastUpdate.getMillis()) {
+            def rawEvent = retrieveCalendar().events().get(GoogleCalendarService.CALENDAR_ID, eventId).execute()
+            event = new CalendarEvent(
+                    eventId: eventId,
+                    location: rawEvent.location,
+                    lastUpdate: lastUpdate.getMillis()
+            )
+            event.save()
+        }
+        return event.location
     }
 
     def private Credential createCredentials() throws Exception {

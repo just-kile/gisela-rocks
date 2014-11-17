@@ -19,7 +19,7 @@ class MainController {
         retrieveCurrentTravel()
 
         List previousTravels = retrievePreviousTravels(client)
-        List upcomingTravels = retrieveUpcomingTraves(client)
+        List upcomingTravels = retrieveUpcomingTravels(client)
 
         def gpsCoordinates = []
         previousTravels.each { travel ->
@@ -61,11 +61,11 @@ class MainController {
         def previousTravels = []
         def items = client.events().list(GoogleCalendarService.CALENDAR_ID).execute().items
         items.each {
+            def updated = new DateTime(it.updated.getValue())
             def start = new DateTime(it.start.date.getValue())
             def end = new DateTime(it.end.date.getValue())
             if (end.beforeNow) {
-                def event = retrieveEventName(it.id)
-                def location = event.getLocation()
+                def location = googleCalendarService.retrieveLocation(it.id, updated)
                 previousTravels.add([start: start, end: end, location: location])
             }
         }
@@ -73,15 +73,15 @@ class MainController {
         previousTravels
     }
 
-    private List retrieveUpcomingTraves(Calendar client) {
+    private List retrieveUpcomingTravels(Calendar client) {
         def upcomingTravels = []
         def items = client.events().list(GoogleCalendarService.CALENDAR_ID).execute().items
         items.each {
+            def updated = new DateTime(it.updated.getValue())
             def start = new DateTime(it.start.date.getValue())
             def end = new DateTime(it.end.date.getValue())
             if (start.afterNow) {
-                def event = retrieveEventName(it.id)
-                def location = event.getLocation()
+                def location = googleCalendarService.retrieveLocation(it.id, updated)
                 upcomingTravels.add([start: start, end: end, location: location])
             }
         }
@@ -102,11 +102,6 @@ class MainController {
             }
         }
     }
-
-    def private retrieveEventName(String eventId) {
-        return client.events().get(GoogleCalendarService.CALENDAR_ID, eventId).execute()
-    }
-
 
     private double calcDistance(double lat1, double lon1, double lat2, double lon2) {
         double theta = lon1 - lon2;
