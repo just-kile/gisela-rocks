@@ -2,6 +2,7 @@ package gisela.rocks
 
 import com.google.api.services.calendar.Calendar
 import org.joda.time.DateTime
+import org.joda.time.DateTimeZone
 import org.joda.time.Interval
 
 class MainController {
@@ -63,7 +64,7 @@ class MainController {
         items.each {
             def updated = new DateTime(it.updated.getValue())
             def start = new DateTime(it.start.date.getValue())
-            def end = new DateTime(it.end.date.getValue())
+            def end = new DateTime(it.end.date.getValue()).minusDays(1)
             if (end.beforeNow) {
                 def location = googleCalendarService.retrieveLocation(it.id, updated)
                 previousTravels.add([start: start, end: end, location: location])
@@ -79,7 +80,7 @@ class MainController {
         items.each {
             def updated = new DateTime(it.updated.getValue())
             def start = new DateTime(it.start.date.getValue())
-            def end = new DateTime(it.end.date.getValue())
+            def end = new DateTime(it.end.date.getValue()).minusDays(1)
             if (start.afterNow) {
                 def location = googleCalendarService.retrieveLocation(it.id, updated)
                 upcomingTravels.add([start: start, end: end, location: location])
