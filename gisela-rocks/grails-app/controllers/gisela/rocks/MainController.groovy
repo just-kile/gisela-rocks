@@ -8,6 +8,7 @@ class MainController {
 
     def grailsApplication
     def googleCalendarService
+    def locationService
 
     def client
     def location
@@ -20,24 +21,11 @@ class MainController {
         List previousTravels = retrievePreviousTravels(client)
         List upcomingTravels = retrieveUpcomingTraves(client)
 
-//        previousTravels.each { travel ->
-//            withHttp(uri: 'https://maps.googleapis.com') {
-//                def json = get(path: '/maps/api/geocode/json', query: [
-//                        address: travel.location,
-//                        key: 'AIzaSyCqTc32RWYI_Ntl-EZUF3q5XhfOUHzNHYM'])
-//                println json
-//            }
-//        }
-
         def gpsCoordinates = []
         previousTravels.each { travel ->
-            withHttp(uri: "https://maps.googleapis.com") {
-                def html = get(path: '/maps/api/geocode/json', query: [address: travel.location])
-                try {
-                    gpsCoordinates.add html.results[0].geometry.location
-                } catch (Throwable th) {
-                    th.printStackTrace()
-                }
+            def location = locationService.retrieveLocation(travel.location)
+            if (location){
+                gpsCoordinates.add([lat:location.latitude, lng:location.longitude])
             }
         }
 
@@ -49,9 +37,6 @@ class MainController {
             // trip distance: return trip!
             totalDistance += 2 * calcDistance(it.lat, it.lng, homeLat, homeLng)
         }
-
-        println gpsCoordinates
-        println totalDistance
 
         [
                 current       : [
