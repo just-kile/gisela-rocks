@@ -93,13 +93,13 @@ class MainController {
     private void retrieveCurrentTravel() {
         def items = client.events().list(GoogleCalendarService.CALENDAR_ID).execute().items
         items.each {
+            def updated = new DateTime(it.updated.getValue())
             def start = new DateTime(it.start.date.getValue())
             def end = new DateTime(it.end.date.getValue())
             def interval = new Interval(start, end)
             if (interval.containsNow()) {
-                def event = retrieveEventName(it.id)
-                location = event.getLocation()
-                until = new DateTime(event.end.date.getValue())
+                location = googleCalendarService.retrieveLocation(it.id, updated)
+                until = end
             }
         }
     }
