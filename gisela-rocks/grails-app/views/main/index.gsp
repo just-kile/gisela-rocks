@@ -20,12 +20,21 @@
             var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
 
             <g:each in="${previous}">
-                new google.maps.Marker({
-                    position:  new google.maps.LatLng(${it.coordinates.latitude}, ${it.coordinates.longitude}),
-                    map: map,
-                    title: "${it.location}"
-                });
+            new google.maps.Marker({
+                position: new google.maps.LatLng(${it.coordinates.latitude}, ${it.coordinates.longitude}),
+                map: map,
+                title: "${it.location}"
+            });
             </g:each>
+
+            <g:if test="${current}">
+            new google.maps.Marker({
+                position: new google.maps.LatLng(${current.coordinates.latitude}, ${current.coordinates.longitude}),
+                map: map,
+                title: "${current.location}",
+                icon: "http://gmapsmarkergenerator.eu01.aws.af.cm/getmarker?scale=1&color=00ff00"
+            });
+            </g:if>
         }
 
         google.maps.event.addDomListener(window, 'load', initialize);
@@ -39,9 +48,9 @@
 
 <div class="jumbotron">
     <h1>Gisela, die Wanderkrabbe</h1>
-    <g:if test="${current.isTraveling}">
+    <g:if test="${current}">
         <p>
-            Momentan @${current.location} (bis ${current.until.getDayOfMonth()}.${current.until.getMonthOfYear()}.).
+            Momentan @${current.location} (bis ${current.end.getDayOfMonth()}.${current.end.getMonthOfYear()}.).
         </p>
     </g:if>
     <g:else>

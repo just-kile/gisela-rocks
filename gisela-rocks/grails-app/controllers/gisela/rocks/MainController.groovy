@@ -20,16 +20,12 @@ class MainController {
         int totalDistance = calcTotalTravelDistance(previousTravels)
 
         [
-                current       : [
-                        isTraveling: currentTravel != null,
-                        location   : currentTravel.location,
-                        until      : currentTravel.end
-                ],
+                current   : currentTravel,
 
-                previous      : previousTravels,
-                upcoming      : upcomingTravels,
+                previous  : previousTravels,
+                upcoming  : upcomingTravels,
 
-                statistics    : [
+                statistics: [
                         totalDistance: totalDistance
                 ]
 
