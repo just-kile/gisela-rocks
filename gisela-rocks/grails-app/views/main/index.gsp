@@ -19,11 +19,11 @@
             }
             var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
 
-            <g:each in="${gpsCoordinates}">
+            <g:each in="${previous}">
                 new google.maps.Marker({
-                    position:  new google.maps.LatLng(${it.lat}, ${it.lng}),
+                    position:  new google.maps.LatLng(${it.coordinates.latitude}, ${it.coordinates.longitude}),
                     map: map,
-                    title: 'Hello World!'
+                    title: "${it.location}"
                 });
             </g:each>
         }

@@ -17,22 +17,7 @@ class MainController {
         List previousTravels = retrievePreviousTravels(client)
         List upcomingTravels = retrieveUpcomingTravels(client)
 
-        def gpsCoordinates = []
-        previousTravels.each { travel ->
-            def location = locationService.retrieveLocation(travel.location)
-            if (location) {
-                gpsCoordinates.add([lat: location.latitude, lng: location.longitude])
-            }
-        }
-
-        def totalDistance = 0
-        def homeLat = grailsApplication.config.gisela.home.lat.toDouble()
-        def homeLng = grailsApplication.config.gisela.home.lng.toDouble()
-
-        gpsCoordinates.each {
-            // trip distance: return trip!
-            totalDistance += 2 * calcDistance(it.lat, it.lng, homeLat, homeLng)
-        }
+        int totalDistance = calcTotalTravelDistance(previousTravels)
 
         [
                 current       : [
@@ -44,13 +29,24 @@ class MainController {
                 previous      : previousTravels,
                 upcoming      : upcomingTravels,
 
-                gpsCoordinates: gpsCoordinates,
-
                 statistics    : [
                         totalDistance: totalDistance
                 ]
 
         ]
+    }
+
+    private int calcTotalTravelDistance(List previousTravels) {
+        def totalDistance = 0
+        def homeLat = grailsApplication.config.gisela.home.lat.toDouble()
+        def homeLng = grailsApplication.config.gisela.home.lng.toDouble()
+
+        previousTravels.each { travel ->
+            // trip distance: return trip!
+            if (travel.coordinates)
+                totalDistance += 2 * calcDistance(travel.coordinates.latitude, travel.coordinates.longitude, homeLat, homeLng)
+        }
+        totalDistance
     }
 
     private List retrievePreviousTravels(Calendar client) {
