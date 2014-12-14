@@ -61,8 +61,7 @@
                 Gisela reist gern. Und deshalb auch oft. Sie ist insgesamt schon <b>${(int) statistics.totalDistance}km</b> gewandert!
                 <ul>
                     <g:each in="${previous}">
-                        <li><b>${it.location}</b> (${it.start.getDayOfMonth()}.${it.start.getMonthOfYear()}.${it.start.getYear()}<g:if test="${it.start != it.end}"> bis ${it.end.getDayOfMonth()}.${it.end.getMonthOfYear()}.${it.end.getYear()}</g:if>)
-                        </li>
+                        <g:render template="travel" model="${it}"/>
                     </g:each>
                 </ul>
             </div>
@@ -72,8 +71,7 @@
                 <g:if test="${upcoming}">
                     <ul>
                         <g:each in="${upcoming}">
-                            <li><b>${it.location}</b> (${it.start.getDayOfMonth()}.${it.start.getMonthOfYear()}.${it.start.getYear()}<g:if test="${it.start != it.end}"> bis ${it.end.getDayOfMonth()}.${it.end.getMonthOfYear()}.${it.end.getYear()}</g:if>)
-                            </li>
+                            <g:render template="travel" model="${it}"/>
                         </g:each>
                     </ul>
                 </g:if>
