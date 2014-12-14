@@ -2,7 +2,6 @@ package gisela.rocks
 
 import com.google.api.services.calendar.Calendar
 import org.joda.time.DateTime
-import org.joda.time.DateTimeZone
 import org.joda.time.Interval
 
 class MainController {
@@ -17,7 +16,7 @@ class MainController {
 
     def index() {
         client = googleCalendarService.retrieveCalendar()
-        retrieveCurrentTravel()
+        retrieveCurrentTravel(client)
 
         List previousTravels = retrievePreviousTravels(client)
         List upcomingTravels = retrieveUpcomingTravels(client)
@@ -59,49 +58,34 @@ class MainController {
     }
 
     private List retrievePreviousTravels(Calendar client) {
-        def previousTravels = []
-        def items = client.events().list(GoogleCalendarService.CALENDAR_ID).execute().items
-        items.each {
-            def updated = new DateTime(it.updated.getValue())
-            def start = new DateTime(it.start.date.getValue())
-            def end = new DateTime(it.end.date.getValue()).minusDays(1)
-            if (end.beforeNow) {
-                def location = googleCalendarService.retrieveLocation(it.id, updated)
-                previousTravels.add([start: start, end: end, location: location])
-            }
-        }
-        previousTravels = previousTravels.sort { it.start }.reverse()
-        previousTravels
+        retrieveTravels(client) {start, end -> end.beforeNow}
     }
 
     private List retrieveUpcomingTravels(Calendar client) {
-        def upcomingTravels = []
+        retrieveTravels(client) {start, end -> end.afterNow}
+    }
+
+    private List retrieveTravels(Calendar client, Closure condition) {
+        def travels = []
         def items = client.events().list(GoogleCalendarService.CALENDAR_ID).execute().items
         items.each {
             def updated = new DateTime(it.updated.getValue())
             def start = new DateTime(it.start.date.getValue())
             def end = new DateTime(it.end.date.getValue()).minusDays(1)
-            if (start.afterNow) {
+            if (condition(start, end)) {
                 def location = googleCalendarService.retrieveLocation(it.id, updated)
-                upcomingTravels.add([start: start, end: end, location: location])
+                travels.add([start: start, end: end, location: location])
             }
         }
-        upcomingTravels = upcomingTravels.sort { it.start }
-        upcomingTravels
+        travels = travels.sort { it.start }.reverse()
+        travels
     }
 
-    private void retrieveCurrentTravel() {
-        def items = client.events().list(GoogleCalendarService.CALENDAR_ID).execute().items
-        items.each {
-            def updated = new DateTime(it.updated.getValue())
-            def start = new DateTime(it.start.date.getValue())
-            def end = new DateTime(it.end.date.getValue())
-            def interval = new Interval(start, end)
-            if (interval.containsNow()) {
-                location = googleCalendarService.retrieveLocation(it.id, updated)
-                until = end
-            }
-        }
+    private void retrieveCurrentTravel(Calendar client) {
+        def travels = retrieveTravels(client) {start, end ->new Interval(start, end).containsNow()}
+        def travel = travels.first()
+        location = googleCalendarService.retrieveLocation(travel.id, updated)
+        until = travel.end
     }
 
     private double calcDistance(double lat1, double lon1, double lat2, double lon2) {
