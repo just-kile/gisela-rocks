@@ -81,35 +81,8 @@
             </div>
         </div>
 
-    </div>
-
-</div>
-
-<div class="container-fluid" style="background-color: #000000; color:#ffffff">
-    <div class="row">
-        <div id="map-canvas"></div>
-    </div>
-</div>
-
-<div class="container-fluid" style="background-color: #f1b935">
-
-    <div class="container">
         <div class="row">
             <div class="col-xs-12">
-                <h2>Kontakt</h2>
-
-                <p>
-                    Gisela ist natürlich auf <a href="https://www.facebook.com/giselakrabbe "
-                                                target="_blank">Facebook</a>.
-                </p>
-
-                Sie freut sich sehr auf Deine Urlaubskarte. Schreibe ihr!<br/>
-                <dd class="text-indent-4"><b>Gisela die Wanderkrabbe</b></dd>
-                <dd class="text-indent-4">Postfach 10 13 29</dd>
-                <dd class="text-indent-4">45013 Essen</dd>
-            </dd>
-
-            </p>
                 <p>
                     Giselas Kalendar findest Du <a
                         href="https://www.google.com/calendar/embed?src=5hpviugc2v1c9vkoudqj1po9jo%40group.calendar.google.com&ctz=Europe%2FBerlin"
@@ -117,6 +90,14 @@
                 </p>
             </div>
         </div>
+
+    </div>
+
+</div>
+
+<div class="container-fluid" style="background-color: #000000; color:#ffffff">
+    <div class="row">
+        <div id="map-canvas"></div>
     </div>
 </div>
 
