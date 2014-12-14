@@ -103,8 +103,7 @@
                                                 target="_blank">Facebook</a>.
                 </p>
 
-                <p>
-                    Sie freut sich sehr auf Deine Urlaubskarte. Schreibe ihr!<br/>
+                Sie freut sich sehr auf Deine Urlaubskarte. Schreibe ihr!<br/>
                 <dd class="text-indent-4"><b>Gisela die Wanderkrabbe</b></dd>
                 <dd class="text-indent-4">Postfach 10 13 29</dd>
                 <dd class="text-indent-4">45013 Essen</dd>
