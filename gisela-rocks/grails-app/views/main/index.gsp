@@ -19,13 +19,22 @@
             }
             var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
 
-            <g:each in="${gpsCoordinates}">
-                new google.maps.Marker({
-                    position:  new google.maps.LatLng(${it.lat}, ${it.lng}),
-                    map: map,
-                    title: 'Hello World!'
-                });
+            <g:each in="${previous}">
+            new google.maps.Marker({
+                position: new google.maps.LatLng(${it.coordinates.latitude}, ${it.coordinates.longitude}),
+                map: map,
+                title: "${it.location}"
+            });
             </g:each>
+
+            <g:if test="${current}">
+            new google.maps.Marker({
+                position: new google.maps.LatLng(${current.coordinates.latitude}, ${current.coordinates.longitude}),
+                map: map,
+                title: "${current.location}",
+                icon: "http://gmapsmarkergenerator.eu01.aws.af.cm/getmarker?scale=1&color=00ff00"
+            });
+            </g:if>
         }
 
         google.maps.event.addDomListener(window, 'load', initialize);
@@ -39,9 +48,9 @@
 
 <div class="jumbotron">
     <h1>Gisela, die Wanderkrabbe</h1>
-    <g:if test="${current.isTraveling}">
+    <g:if test="${current}">
         <p>
-            Momentan @${current.location} (bis ${current.until.getDayOfMonth()}.${current.until.getMonthOfYear()}.).
+            Momentan @${current.location} (bis ${current.end.getDayOfMonth()}.${current.end.getMonthOfYear()}.).
         </p>
     </g:if>
     <g:else>
@@ -61,8 +70,7 @@
                 Gisela reist gern. Und deshalb auch oft. Sie ist insgesamt schon <b>${(int) statistics.totalDistance}km</b> gewandert!
                 <ul>
                     <g:each in="${previous}">
-                        <li><b>${it.location}</b> (${it.start.getDayOfMonth()}.${it.start.getMonthOfYear()}.${it.start.getYear()}<g:if test="${it.start != it.end}"> bis ${it.end.getDayOfMonth()}.${it.end.getMonthOfYear()}.${it.end.getYear()}</g:if>)
-                        </li>
+                        <g:render template="travel" model="${it}"/>
                     </g:each>
                 </ul>
             </div>
@@ -72,8 +80,7 @@
                 <g:if test="${upcoming}">
                     <ul>
                         <g:each in="${upcoming}">
-                            <li><b>${it.location}</b> (${it.start.getDayOfMonth()}.${it.start.getMonthOfYear()}.${it.start.getYear()}<g:if test="${it.start != it.end}"> bis ${it.end.getDayOfMonth()}.${it.end.getMonthOfYear()}.${it.end.getYear()}</g:if>)
-                            </li>
+                            <g:render template="travel" model="${it}"/>
                         </g:each>
                     </ul>
                 </g:if>
