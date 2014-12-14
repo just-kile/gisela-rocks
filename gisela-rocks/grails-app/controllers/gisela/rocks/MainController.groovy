@@ -11,13 +11,11 @@ class MainController {
     def locationService
 
     def client
-    def location
-    def until
 
     def index() {
         client = googleCalendarService.retrieveCalendar()
-        retrieveCurrentTravel(client)
 
+        def currentTravel = retrieveCurrentTravel(client)
         List previousTravels = retrievePreviousTravels(client)
         List upcomingTravels = retrieveUpcomingTravels(client)
 
@@ -40,9 +38,9 @@ class MainController {
 
         [
                 current       : [
-                        isTraveling: location != null,
-                        location   : location,
-                        until      : until
+                        isTraveling: currentTravel != null,
+                        location   : currentTravel.location,
+                        until      : currentTravel.end
                 ],
 
                 previous      : previousTravels,
@@ -58,11 +56,15 @@ class MainController {
     }
 
     private List retrievePreviousTravels(Calendar client) {
-        retrieveTravels(client) {start, end -> end.beforeNow}
+        def travels = retrieveTravels(client) {start, end -> end.beforeNow}
+        travels = travels.sort { it.start }.reverse()
+        return travels
     }
 
     private List retrieveUpcomingTravels(Calendar client) {
-        retrieveTravels(client) {start, end -> end.afterNow}
+        def travels = retrieveTravels(client) {start, end -> start.afterNow}
+        travels = travels.sort { it.start }
+        return travels
     }
 
     private List retrieveTravels(Calendar client, Closure condition) {
@@ -77,15 +79,13 @@ class MainController {
                 travels.add([start: start, end: end, location: location])
             }
         }
-        travels = travels.sort { it.start }.reverse()
-        travels
+        return travels
     }
 
-    private void retrieveCurrentTravel(Calendar client) {
+    private def retrieveCurrentTravel(Calendar client) {
         def travels = retrieveTravels(client) {start, end ->new Interval(start, end).containsNow()}
         def travel = travels.first()
-        location = googleCalendarService.retrieveLocation(travel.id, updated)
-        until = travel.end
+        return travel
     }
 
     private double calcDistance(double lat1, double lon1, double lat2, double lon2) {
