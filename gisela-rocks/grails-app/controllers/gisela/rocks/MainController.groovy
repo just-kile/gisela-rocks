@@ -2,7 +2,6 @@ package gisela.rocks
 
 import com.google.api.services.calendar.Calendar
 import org.joda.time.DateTime
-import org.joda.time.DateTimeZone
 import org.joda.time.Interval
 
 class MainController {
@@ -11,97 +10,83 @@ class MainController {
     def googleCalendarService
     def locationService
 
-    def client
-    def location
-    def until
-
     def index() {
-        client = googleCalendarService.retrieveCalendar()
-        retrieveCurrentTravel()
+        def client = googleCalendarService.retrieveCalendar()
 
+        def currentTravel = retrieveCurrentTravel(client)
         List previousTravels = retrievePreviousTravels(client)
         List upcomingTravels = retrieveUpcomingTravels(client)
 
-        def gpsCoordinates = []
-        previousTravels.each { travel ->
-            def location = locationService.retrieveLocation(travel.location)
-            if (location){
-                gpsCoordinates.add([lat:location.latitude, lng:location.longitude])
-            }
-        }
-
-        def totalDistance = 0
-        def homeLat = grailsApplication.config.gisela.home.lat.toDouble()
-        def homeLng = grailsApplication.config.gisela.home.lng.toDouble()
-
-        gpsCoordinates.each {
-            // trip distance: return trip!
-            totalDistance += 2 * calcDistance(it.lat, it.lng, homeLat, homeLng)
-        }
+        int totalDistance = calcTotalTravelDistance(previousTravels)
 
         [
-                current       : [
-                        isTraveling: location != null,
-                        location   : location,
-                        until      : until
-                ],
+                current   : currentTravel,
 
-                previous      : previousTravels,
-                upcoming      : upcomingTravels,
+                previous  : previousTravels,
+                upcoming  : upcomingTravels,
 
-                gpsCoordinates: gpsCoordinates,
-
-                statistics    : [
+                statistics: [
                         totalDistance: totalDistance
                 ]
 
         ]
     }
 
-    private List retrievePreviousTravels(Calendar client) {
-        def previousTravels = []
-        def items = client.events().list(GoogleCalendarService.CALENDAR_ID).execute().items
-        items.each {
-            def updated = new DateTime(it.updated.getValue())
-            def start = new DateTime(it.start.date.getValue())
-            def end = new DateTime(it.end.date.getValue()).minusDays(1)
-            if (end.beforeNow) {
-                def location = googleCalendarService.retrieveLocation(it.id, updated)
-                previousTravels.add([start: start, end: end, location: location])
-            }
+    private int calcTotalTravelDistance(List previousTravels) {
+        def totalDistance = 0
+        def homeLat = grailsApplication.config.gisela.home.lat.toDouble()
+        def homeLng = grailsApplication.config.gisela.home.lng.toDouble()
+
+        previousTravels.each { travel ->
+            // trip distance: return trip!
+            if (travel.coordinates)
+                totalDistance += 2 * calcDistance(travel.coordinates.latitude, travel.coordinates.longitude, homeLat, homeLng)
         }
-        previousTravels = previousTravels.sort { it.start }.reverse()
-        previousTravels
+        totalDistance
+    }
+
+    private List retrievePreviousTravels(Calendar client) {
+        def travels = retrieveTravels(client) { start, end -> end.beforeNow }
+        travels = travels.sort { it.start }.reverse()
+        return travels
     }
 
     private List retrieveUpcomingTravels(Calendar client) {
-        def upcomingTravels = []
-        def items = client.events().list(GoogleCalendarService.CALENDAR_ID).execute().items
-        items.each {
-            def updated = new DateTime(it.updated.getValue())
-            def start = new DateTime(it.start.date.getValue())
-            def end = new DateTime(it.end.date.getValue()).minusDays(1)
-            if (start.afterNow) {
-                def location = googleCalendarService.retrieveLocation(it.id, updated)
-                upcomingTravels.add([start: start, end: end, location: location])
-            }
-        }
-        upcomingTravels = upcomingTravels.sort { it.start }
-        upcomingTravels
+        def travels = retrieveTravels(client) { start, end -> start.afterNow }
+        travels = travels.sort { it.start }
+        return travels
     }
 
-    private void retrieveCurrentTravel() {
+    private List retrieveTravels(Calendar client, Closure condition) {
+        def travels = []
         def items = client.events().list(GoogleCalendarService.CALENDAR_ID).execute().items
-        items.each {
-            def updated = new DateTime(it.updated.getValue())
-            def start = new DateTime(it.start.date.getValue())
-            def end = new DateTime(it.end.date.getValue())
-            def interval = new Interval(start, end)
-            if (interval.containsNow()) {
-                location = googleCalendarService.retrieveLocation(it.id, updated)
-                until = end
-            }
+        items.each { calendarEntry ->
+            processCalendarEntry(travels, calendarEntry, condition)
         }
+        return travels
+    }
+
+    private void processCalendarEntry(def travels, def calendarEntry, Closure condition) {
+        def updated = new DateTime(calendarEntry.updated.getValue())
+        def start = new DateTime(calendarEntry.start.date.getValue())
+        def end = new DateTime(calendarEntry.end.date.getValue()).minusDays(1)
+        if (condition(start, end)) {
+            def location = googleCalendarService.retrieveLocation(calendarEntry.id, updated)
+            def coordinates = locationService.retrieveLocation(location)
+            def travel = [
+                    start      : start,
+                    end        : end,
+                    location   : location,
+                    coordinates: coordinates
+            ]
+            travels.add(travel)
+        }
+    }
+
+    private def retrieveCurrentTravel(Calendar client) {
+        def travels = retrieveTravels(client) { start, end -> new Interval(start, end).containsNow() }
+        def travel = travels.first()
+        return travel
     }
 
     private double calcDistance(double lat1, double lon1, double lat2, double lon2) {
