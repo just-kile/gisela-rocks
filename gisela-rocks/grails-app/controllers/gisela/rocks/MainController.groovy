@@ -85,8 +85,11 @@ class MainController {
 
     private def retrieveCurrentTravel(Calendar client) {
         def travels = retrieveTravels(client) { start, end -> new Interval(start, end).containsNow() }
-        def travel = travels.first()
-        return travel
+        if (travels) {
+            return  travels.first()
+        } else {
+            return null
+        }
     }
 
     private double calcDistance(double lat1, double lon1, double lat2, double lon2) {
