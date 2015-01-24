@@ -61,7 +61,10 @@ class MainController {
         def travels = []
         def items = client.events().list(GoogleCalendarService.CALENDAR_ID).execute().items
         items.each { calendarEntry ->
-            processCalendarEntry(travels, calendarEntry, condition)
+            boolean isValidEntry = calendarEntry.updated && calendarEntry.start?.date && calendarEntry.end?.date
+            if (isValidEntry) {
+                processCalendarEntry(travels, calendarEntry, condition)
+            }
         }
         return travels
     }
@@ -86,7 +89,7 @@ class MainController {
     private def retrieveCurrentTravel(Calendar client) {
         def travels = retrieveTravels(client) { start, end -> new Interval(start, end).containsNow() }
         if (travels) {
-            return  travels.first()
+            return travels.first()
         } else {
             return null
         }
