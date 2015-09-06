@@ -20,11 +20,13 @@
             var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
 
             <g:each in="${previous}">
-            new google.maps.Marker({
-                position: new google.maps.LatLng(${it.coordinates.latitude}, ${it.coordinates.longitude}),
-                map: map,
-                title: "${it.location}"
-            });
+                <g:if test="${it.coordinates}">
+                new google.maps.Marker({
+                    position: new google.maps.LatLng(${it.coordinates.latitude}, ${it.coordinates.longitude}),
+                    map: map,
+                    title: "${it.location}"
+                });
+                </g:if>
             </g:each>
 
             <g:if test="${current}">
