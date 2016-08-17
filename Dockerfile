@@ -1,6 +1,6 @@
 #context must contain certificate gisela-rocks-e88cde3d6ea4.p12
 
-FROM ubuntu:14.10
+FROM ubuntu:14.04
 
 MAINTAINER "Thomas Kipar"
 
