@@ -15,6 +15,17 @@
 .jumbotron {
     color: white !important;
     background: url('/gisela-rocks/assets/gisela.jpg') no-repeat center center;
-    background-size: 100%;
+    background-size: cover;
     height: 400px;
+    margin-bottom: 0px !important;
+}
+
+#map-canvas {
+    height: 400px;
+    margin: 0px;
+    padding: 0px
+}
+
+.text-indent-4{
+    text-indent: 50px;
 }
